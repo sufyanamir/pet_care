@@ -43,7 +43,7 @@ $(document).ready(function () {
                     autoRun: false,
                     barThickness: 3,
                     barColors: {
-                        '0': '#930027'
+                        '0': '#EE81AF'
                     },
                     shadowBlur: 5,
                     shadowColor: 'rgba(0, 0, 0, .5)',

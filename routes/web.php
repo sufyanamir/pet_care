@@ -10,10 +10,17 @@ Route::middleware(['custom_auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     });
+    
     Route::get('/', function () {
         return view('dashboard');
     });
+    
     Route::get('/animals', [AnimalController::class, 'getAnimals']);
+
+    Route::post('/addAnimal', [AnimalController::class, 'addAnimal']);
+    Route::match(['post', 'get'], '/delete/animal/{id}', [AnimalController::class, 'deleteAnimal']);
+    Route::get('/getAnimalDetail/{id}', [AnimalController::class, 'getAnimalDetail']);
+
 });
 
 
