@@ -1,0 +1,40 @@
+/* Apply margin to the "Show entries" section */
+div.dataTables_length {
+    margin-left: 15px;
+}
+
+.dataTables_length select {
+    border-radius: 10px !important;
+    outline: none !important;
+    width: 40% !important;
+}
+
+/* Apply margin to the search section */
+div.dataTables_filter {
+    margin-right: 15px;
+    margin-bottom: 10px;
+    /* margin-left: 20px; */
+}
+
+.dataTables_filter input {
+    border-radius: 10px !important;
+    outline: none !important;
+}
+
+div.dataTables_info {
+    text-align: right;
+    margin-left: 15px;
+    color: #ACADAE !important;
+
+}
+
+div.dataTables_paginate {
+    text-align: right;
+    margin-right: 15px;
+}
+
+a.paginate_button.current {
+    background: #ECECEC !important;
+    border: none !important;
+    border-radius: 20px !important;
+}
