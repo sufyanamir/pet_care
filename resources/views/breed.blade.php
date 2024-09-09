@@ -2,34 +2,36 @@
 <div class=" bg-white w-full rounded-2xl shadow-lg">
     <div class=" flex justify-between p-3 rounded-t-2xl">
         <div class=" text-xl font-semibold">
-            <h4>Animal List</h4>
+            <h4>Breed List</h4>
         </div>
 
 
         <!-- Modal toggle -->
         <button data-modal-target="crud-modal" data-modal-toggle="crud-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
-            Add Animal
+            Add Breed
         </button>
     </div>
     <div class=" py-4 overflow-x-auto">
         <table id="universalTable" class="display" style="width:100%">
             <thead class=" text-sm">
                 <tr>
-                    <th></th>
                     <th>Animal Name</th>
+                    <th></th>
+                    <th>Animal Breed</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="universalTableBody" class=" text-sm">
-                @foreach($animals as $animal)
+                @foreach($breeds as $breed)
                 <tr>
-                    <td><img src="{{asset($animal->animal_image)}}" class=" w-12" alt="Image"></td>
-                    <td>{{ $animal->animal_name }}</td>
+                    <td>{{$breed->animal->animal_name}}</td>
+                    <td><img src="{{asset($breed->breed_image)}}" class=" w-12" alt="Image"></td>
+                    <td>{{$breed->breed_name}}</td>
                     <td>
-                        <button id="editAnimal" class="editAnimal" data-modal-toggle="crud-modal" data-animal-id="{{$animal->animal_id}}" data-animal-name="{{$animal->animal_name}}">
+                        <button id="editBreed" class="editBreed" data-modal-toggle="crud-modal" data-breed-id="{{$breed->breed_id}}" data-animal-id="{{$breed->animal_id}}" data-breed-name="{{$breed->breed_name}}">
                             <img src="{{ asset('assets/icons/edit-icon.svg') }}" alt="btn">
                         </button>
-                        <form action="/delete/animal/{{ $animal->animal_id }}" class=" inline-block" method="post">
+                        <form action="/delete/breed/{{ $breed->breed_id }}" class=" inline-block" method="post">
                             @csrf
                             <button type="submit">
                                 <img src="{{ asset('assets/icons/del-icon.svg') }}" alt="btn">
@@ -50,7 +52,7 @@
             <!-- Modal header -->
             <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Add New Animal
+                    Add New Breed
                 </h3>
                 <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -60,17 +62,26 @@
                 </button>
             </div>
             <!-- Modal body -->
-            <form class="p-4 md:p-5" id="animalForm" method="POST" action="/addAnimal" enctype="multipart/form-data">
+            <form class="p-4 md:p-5" id="breedForm" method="POST" action="/addBreed" enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" id="animal_id" name="animal_id" value="">
+                <input type="hidden" id="breed_id" name="breed_id" value="">
                 <div class="grid gap-4 mb-4 grid-cols-2">
-                    <div class="col-span-2 sm:col-span-1">
+                    <div class="col-span-2">
                         <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Animal Name</label>
-                        <input type="text" name="animalName" id="animalName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Animal Name" required="">
+                        <select name="animal_id" id="animal_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Animal Name" required="">
+                            <option value="">Select Animal</option>
+                            @foreach($animals as $animal)
+                            <option value="{{$animal->animal_id}}">{{$animal->animal_name}}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="col-span-2 sm:col-span-1">
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Animal Image</label>
-                        <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="animalImage" name="animalImage" type="file">
+                        <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Animal Breed</label>
+                        <input type="text" name="animalBreed" id="animalBreed" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Animal Name" required="">
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Breed Image</label>
+                        <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="breedImage" name="breedImage" type="file">
                     </div>
                 </div>
                 <div class="" align="right">
@@ -99,28 +110,30 @@
 <script>
     $(document).ready(function() {
         // Click event for edit buttons
-        $('.editAnimal').on('click', function() {
+        $('.editBreed').on('click', function() {
             // Get animal data from data attributes
+            var breedId = $(this).data('breed-id');
+            var breedName = $(this).data('breed-name');
             var animalId = $(this).data('animal-id');
-            var animalName = $(this).data('animal-name');
 
             // Set the form fields with the fetched data
-            $('#animal_id').val(animalId);
-            $('#animalName').val(animalName);
+            $('#breed_id').val(breedId);
+            $('#animalBreed').val(breedName);
+            $('#animal_id').val(animalId).change();
         });
 
         function checkModalHidden() {
             if ($('#crud-modal').hasClass('hidden')) {
-                $('#animalForm')[0].reset(); // Reset form fields
-                $('#animal_id').val(''); // Clear hidden animal ID field
+                $('#breedForm')[0].reset(); // Reset form fields
+                $('#breed_id').val(''); // Clear hidden animal ID field
             }
         }
 
         setInterval(checkModalHidden, 100);
 
-        $(window).on('beforeunload', function () { 
+        $(window).on('beforeunload', function() {
             clearInterval(checkModalHidden);
-         })
+        })
 
     });
 </script>

@@ -21,12 +21,12 @@ class AnimalController extends Controller
 
             $user = session('user_details');
 
-            $validatedData = $request->validate([
-                'animal_id' => 'nullable',
-                'animalName' => 'required',
-            ]);
+            if ($request->input('animal_id') != null) {
+                $validatedData = $request->validate([
+                    'animal_id' => 'nullable',
+                    'animalName' => 'required',
+                ]);
 
-            if ($validatedData['animal_id'] != null) {
 
                 $animal = Animal::where('animal_id', $validatedData['animal_id'])->first();
 
@@ -49,15 +49,18 @@ class AnimalController extends Controller
                     $imageFullPath = 'storage/' . $imagePath;
                     $animal->animal_image = $imageFullPath;
                 }
-                
+
                 $animal->animal_name = $validatedData['animalName'];
 
                 $animal->save();
 
                 return response()->json(['success' => true, 'message' => 'Animal updated!'], 200);
-
             } else {
-
+                $validatedData = $request->validate([
+                    'animal_id' => 'nullable',
+                    'animalName' => 'required',
+                    'animalImage' => 'required',
+                ]);
                 // Handle the image upload
                 if ($request->hasFile('animalImage')) {
                     $image = $request->file('animalImage');
@@ -65,7 +68,7 @@ class AnimalController extends Controller
                     $imagePath = $image->store('animal_images', 'public'); // stored in 'storage/app/public/animal_images'
                     $imageFullPath = 'storage/' . $imagePath;
                 } else {
-                    $imageFullPath = '';
+                    $imageFullPath = NULL;
                 }
 
                 // Create the animal entry in the database
