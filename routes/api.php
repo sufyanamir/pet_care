@@ -9,5 +9,16 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
+Route::middleware(['auth:sanctum'])->group(function () {
+
+    Route::get('/getAnimals', [ApiController::class, 'getAnimals']);
+    Route::get('/getBreed/{id}', [ApiController::class, 'getBreed']);
+
+    Route::post('/addPet', [ApiController::class, 'addPet']);
+    Route::get('/getPets', [ApiController::class, 'getPets']);
+
+    Route::get('/getPetDetails/{id}/{key?}', [ApiController::class, 'getPetDetails']);
+});
+
 Route::post('/login', [ApiController::class, 'login']);
 Route::post('/register', [ApiController::class, 'register']);

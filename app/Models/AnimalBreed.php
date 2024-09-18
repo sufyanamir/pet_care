@@ -27,4 +27,10 @@ class AnimalBreed extends Model
 
     public $timestamps = true;
 
+    public function getBreedImageAttribute($value)
+    {
+        return $value ? asset($value) : null;
+    }
+
+
 }
