@@ -30,6 +30,9 @@ Route::middleware(['custom_auth'])->group(function () {
 Route::get('/login', function () {
     return view('login');
 });
+Route::get('/', function () {
+    return view('login');
+});
 
 Route::post('/Login', [UserController::class, 'login']);
 Route::match(['get, post'], '/logout', [UserController::class, 'logout']);
