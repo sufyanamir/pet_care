@@ -47,4 +47,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function getUserImageAttribute($value)
+    {
+        return $value ? asset($value) : null;
+    }
 }

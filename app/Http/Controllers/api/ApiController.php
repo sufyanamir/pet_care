@@ -267,4 +267,13 @@ class ApiController extends Controller
         }
     }
     // Register
+    
+    // get User
+    public function getUserDetails(){
+        $user = Auth::user();
+
+        return response()->json(['success' => true, 'message' => 'user get successfully', 'data' => $user]);
+
+    }
+    // get User
 }

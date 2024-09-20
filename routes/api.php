@@ -18,6 +18,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/getPets', [ApiController::class, 'getPets']);
 
     Route::get('/getPetDetails/{id}/{key?}', [ApiController::class, 'getPetDetails']);
+
+    Route::get('/getUserDetails', [ApiController::class, 'getUserDetails']);
+
 });
 
 Route::post('/login', [ApiController::class, 'login']);
