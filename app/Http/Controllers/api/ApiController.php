@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use App\Models\Animal;
 use App\Models\AnimalBreed;
+use App\Models\Feeds;
 use App\Models\Pet;
 use App\Models\PetImages;
 use App\Models\User;
@@ -30,6 +31,97 @@ class ApiController extends Controller
     }
     // user Defined
 
+    // update user details
+    public function updateUserDetails(Request $request)
+    {
+        try {
+            $user = Auth::user();
+
+            $validatedData = $request->validate([
+                'fullName' => 'nullable',
+                'phone' => 'nullable',
+                'email' => 'nullable',
+                'address' => 'nullable',
+                'password' => 'nullable',
+            ]);
+
+            $updateUser = User::where('id', $user->id)->first();
+
+            if (isset($validatedData['fullName']) && !empty($validatedData['fullName'])) {
+                $updateUser->name = $validatedData['fullName'];
+            }
+            if (isset($validatedData['phone']) && !empty($validatedData['phone'])) {
+                $updateUser->phone = $validatedData['phone'];
+            }
+            if (isset($validatedData['email']) && !empty($validatedData['email'])) {
+                $updateUser->email = $validatedData['email'];
+            }
+            if (isset($validatedData['address']) && !empty($validatedData['address'])) {
+                $updateUser->address = $validatedData['address'];
+            }
+            if (isset($validatedData['password']) && !empty($validatedData['password'])) {
+                $updateUser->password = $validatedData['password'];
+            }
+
+            $updateUser->save();
+
+            return response()->json(['success' => true, 'message' => 'Profile Updated'], 200);
+
+        } catch (\Exception $e) {
+            return $this->errorResponse($e);
+        }
+    }
+    // update user details
+
+    // get feeds
+    public function getFeed()
+    {
+        $feed = Feeds::get();
+
+        if ($feed->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No feed found', 'data' => []]);
+        }
+
+        return response()->json(['success' => true, 'data' => $feed], 200);
+    }
+    // get feeds
+
+    // add feeds
+    public function addFeed(Request $request)
+    {
+        try {
+
+            $user = Auth::user();
+
+            $validatedData = $request->validate([
+                'pet_id' => 'required',
+                'feed_post' => 'required',
+                'post_desc' => 'nullable',
+            ]);
+
+            if ($request->hasFile('feed_post')) {
+                $image = $request->file('feed_post');
+                // Store the image in the 'animal_images' folder and get the file path
+                $imagePath = $image->store('feed_posts', 'public'); // stored in 'storage/app/public/animal_images'
+                $imageFullPath = 'storage/' . $imagePath;
+            } else {
+                $imageFullPath = NULL;
+            }
+
+            $feed = Feeds::create([
+                'added_user_id' => $user->id,
+                'pet_id' => $validatedData['pet_id'],
+                'feed_post' => $imageFullPath,
+                'post_desc' => $validatedData['post_desc'],
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Posts created successfully'], 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e);
+        }
+    }
+    // add feeds
+
     // add pet images
     public function addPetImages(Request $request)
     {
@@ -39,8 +131,8 @@ class ApiController extends Controller
 
             // Validate that 'pet_id' is required and 'pet_image' is an array of required images
             $validatedData = $request->validate([
-                'pet_id' => 'required|exists:pets,id',  // Assuming you have a pets table
-                'pet_image.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',  // Multiple image validation
+                'pet_id' => 'required',  // Assuming you have a pets table
+                'pet_image.*' => 'required',  // Multiple image validation
             ]);
 
             $petId = $validatedData['pet_id'];
@@ -84,7 +176,7 @@ class ApiController extends Controller
                 if (is_null($pet)) {
                     return response()->json(['success' => false, 'message' => 'Pet not found', 'data' => []], 404);
                 }
-            }elseif ($key == 'photos') {
+            } elseif ($key == 'photos') {
                 $pet = PetImages::where('pet_id', $id)->first();
 
                 if (is_null($pet)) {
@@ -267,13 +359,13 @@ class ApiController extends Controller
         }
     }
     // Register
-    
+
     // get User
-    public function getUserDetails(){
+    public function getUserDetails()
+    {
         $user = Auth::user();
 
         return response()->json(['success' => true, 'message' => 'user get successfully', 'data' => $user]);
-
     }
     // get User
 }

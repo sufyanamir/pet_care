@@ -11,15 +11,20 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
+    Route::post('/addFeed', [ApiController::class, 'addFeed']);
+    Route::get('/getFeed', [ApiController::class, 'getFeed']);
+
     Route::get('/getAnimals', [ApiController::class, 'getAnimals']);
     Route::get('/getBreed/{id}', [ApiController::class, 'getBreed']);
 
     Route::post('/addPet', [ApiController::class, 'addPet']);
     Route::get('/getPets', [ApiController::class, 'getPets']);
+    Route::post('/addPetImages', [ApiController::class, 'addPetImages']);
 
     Route::get('/getPetDetails/{id}/{key?}', [ApiController::class, 'getPetDetails']);
 
     Route::get('/getUserDetails', [ApiController::class, 'getUserDetails']);
+    Route::post('/updateUserDetails', [ApiController::class, 'updateUserDetails']);
 
 });
 
