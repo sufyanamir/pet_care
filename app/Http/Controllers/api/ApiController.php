@@ -132,7 +132,7 @@ class ApiController extends Controller
             // Validate that 'pet_id' is required and 'pet_image' is an array of required images
             $validatedData = $request->validate([
                 'pet_id' => 'required',  // Assuming you have a pets table
-                'pet_image.*' => 'required',  // Multiple image validation
+                'pet_image' => 'required',  // Multiple image validation
             ]);
 
             $petId = $validatedData['pet_id'];
@@ -140,9 +140,9 @@ class ApiController extends Controller
 
             $imagePaths = [];
 
-            foreach ($images as $image) {
+            // foreach ($images as $image) {
                 // Store each image and get the path
-                $imagePath = $image->store('pet_images', 'public'); // stored in 'storage/app/public/animal_images'
+                $imagePath = $images->store('pet_images', 'public'); // stored in 'storage/app/public/animal_images'
                 $imageFullPath[] = 'storage/' . $imagePath;
 
                 // Optionally save image paths to a database table
@@ -151,12 +151,11 @@ class ApiController extends Controller
                     'pet_id' => $petId,
                     'pet_image' => $imageFullPath,
                 ]);
-            }
+            // }
             DB::commit();
             return response()->json([
                 'success' => true,
-                'message' => 'Images uploaded successfully!',
-                'image_paths' => $imagePaths,
+                'message' => 'Images uploaded successfully!'
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
