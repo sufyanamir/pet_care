@@ -173,7 +173,7 @@ class ApiController extends Controller
 
                 $pet = Pet::with(['animal', 'breed'])->where('pet_id', $id)->first();
 
-                if (is_null($pet)) {
+                if ($pet->isEmpty()) {
                     return response()->json(['success' => false, 'message' => 'Pet not found', 'data' => []], 404);
                 }
             } elseif ($key == 'photos') {

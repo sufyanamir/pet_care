@@ -35,4 +35,4 @@ Route::get('/', function () {
 });
 
 Route::post('/Login', [UserController::class, 'login']);
-Route::match(['get, post'], '/logout', [UserController::class, 'logout']);
+Route::match(['get', 'post'], '/logout', [UserController::class, 'logout']);
