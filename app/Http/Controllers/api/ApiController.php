@@ -180,7 +180,7 @@ class ApiController extends Controller
                 $pet = PetImages::where('pet_id', $id)->get();
 
                 if ($pet->isEmpty()) {
-                    return response()->json(['success' => false, 'message' => 'Pet not found', 'data' => []], 404);
+                    return response()->json(['success' => false, 'message' => 'Pet image not found', 'data' => []], 404);
                 }
             }
 
