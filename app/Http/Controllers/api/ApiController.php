@@ -143,7 +143,7 @@ class ApiController extends Controller
             // foreach ($images as $image) {
                 // Store each image and get the path
                 $imagePath = $images->store('pet_images', 'public'); // stored in 'storage/app/public/animal_images'
-                $imageFullPath[] = 'storage/' . $imagePath;
+                $imageFullPath = 'storage/' . $imagePath;
 
                 // Optionally save image paths to a database table
                 PetImages::create([
