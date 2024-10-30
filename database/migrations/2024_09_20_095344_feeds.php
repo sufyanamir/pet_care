@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('feed_post');
             $table->text('post_desc');
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('update_at')->nullable()->useCurrent();
+            $table->timestamp('updated_at')->nullable()->useCurrent();
         });
     }
 
