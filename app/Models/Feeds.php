@@ -22,7 +22,7 @@ class Feeds extends Model
 
     public $timestamps = true;
 
-    public function getFeedImageAttribute($value)
+    public function getFeedPostAttribute($value)
     {
         return $value ? asset($value) : null;
     }
