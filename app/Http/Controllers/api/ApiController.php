@@ -76,7 +76,9 @@ class ApiController extends Controller
     // get feeds
     public function getFeed()
     {
-        $feed = Feeds::get();
+        $feed = Feeds::with([
+            'user:name',
+        ])->get();
 
         if ($feed->isEmpty()) {
             return response()->json(['success' => false, 'message' => 'No feed found', 'data' => []]);

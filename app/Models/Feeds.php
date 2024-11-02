@@ -26,5 +26,15 @@ class Feeds extends Model
     {
         return $value ? asset($value) : null;
     }
+    
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'added_user_id');
+    }
+
+    public function pet()
+    {
+        return $this->belongsTo(Pet::class, 'pet_id');
+    }
 
 }
