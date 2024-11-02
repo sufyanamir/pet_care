@@ -21,4 +21,9 @@ class PetImages extends Model
 
     public $timestamps = true;
 
+    public function getPetImageAttribute($value)
+    {
+        return $value ? asset($value) : null;
+    }
+
 }
