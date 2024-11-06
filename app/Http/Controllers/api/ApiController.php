@@ -63,6 +63,14 @@ class ApiController extends Controller
                 $updateUser->password = $validatedData['password'];
             }
 
+            if ($request->hasFile('user_image')) {
+                $image = $request->file('user_image');
+                // Store the image in the 'animal_images' folder and get the file path
+                $imagePath = $image->store('user_images', 'public'); // stored in 'storage/app/public/animal_images'
+                $imageFullPath = 'storage/' . $imagePath;
+                $updateUser->user_image = $imageFullPath;
+            }
+
             $updateUser->save();
 
             return response()->json(['success' => true, 'message' => 'Profile Updated'], 200);
