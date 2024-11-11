@@ -18,6 +18,7 @@ class Feeds extends Model
         'pet_id',
         'feed_post',
         'post_desc',
+        'feed_likes',
     ];
 
     public $timestamps = true;

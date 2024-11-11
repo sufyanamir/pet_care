@@ -74,12 +74,67 @@ class ApiController extends Controller
             $updateUser->save();
 
             return response()->json(['success' => true, 'message' => 'Profile Updated'], 200);
-
         } catch (\Exception $e) {
             return $this->errorResponse($e);
         }
     }
     // update user details
+
+    // like feeds
+    public function likeFeed(Request $request)
+    {
+        try {
+
+            $validatedData = $request->validate([
+                'feed_id' => 'required',
+                'key' => 'required',
+            ]);
+
+            $feed = Feeds::where('feed_id', $validatedData['feed_id'])->first();
+
+            if ($validatedData['key'] == 'like') {
+                $feed->feed_likes += 1;
+                $feed->save();
+
+                return response()->json(['success' => true, 'message' => 'Post Liked'], 200);
+            } elseif ($validatedData['key'] == 'disLike') {
+                $feed->feed_likes -= 1;
+                $feed->save();
+
+                return response()->json(['success' => true, 'message' => 'Post Disliked'], 200);
+            }
+        } catch (\Exception $e) {
+            return $this->errorResponse($e);
+        }
+    }
+    // like feeds
+
+    // delete feeds
+    public function deleteFeed(Request $request)
+    {
+        try {
+
+            $validatedData = $request->validate([
+                'feed_id' => 'required',
+            ]);
+
+            $feed = Feeds::where('feed_id', $validatedData['feed_id'])->first();
+
+            $imagePath = public_path($feed->feed_post); // Get the full image path
+
+            // Delete the image file if it exists
+            if (file_exists($imagePath)) {
+                unlink($imagePath); // Delete the image from the file system
+            }
+
+            $feed->delete();
+
+            return response()->json(['success' => true, 'message' => 'Feed deleted'], 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e);
+        }
+    }
+    // delete feeds
 
     // get feeds
     public function getFeed()
@@ -148,18 +203,18 @@ class ApiController extends Controller
 
             $imagePaths = [];
 
-            // foreach ($images as $image) {
-                // Store each image and get the path
-                $imagePath = $images->store('pet_images', 'public'); // stored in 'storage/app/public/animal_images'
-                $imageFullPath = 'storage/' . $imagePath;
+            foreach ($images as $image) {
+            // Store each image and get the path
+            $imagePath = $image->store('pet_images', 'public'); // stored in 'storage/app/public/animal_images'
+            $imageFullPath = 'storage/' . $imagePath;
 
-                // Optionally save image paths to a database table
-                PetImages::create([
-                    'added_user_id' => $user->id,
-                    'pet_id' => $petId,
-                    'pet_image' => $imageFullPath,
-                ]);
-            // }
+            // Optionally save image paths to a database table
+            PetImages::create([
+                'added_user_id' => $user->id,
+                'pet_id' => $petId,
+                'pet_image' => $imageFullPath,
+            ]);
+            }
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -198,6 +253,28 @@ class ApiController extends Controller
     }
     // get Pet Details
 
+    // delete Pet
+    public function deletePet(Request $request)
+    {
+        try {
+
+            $validatedData = $request->validate([
+                'pet_id' => 'required',
+            ]);
+
+            $pet = Pet::where('pet_id', $validatedData['pet_id'])->first();
+
+            $pet->pet_status = 0;
+            $pet->save();
+
+            return response()->json(['success' => true, 'message' => 'Pet delted'], 200);
+            
+        } catch (\Exception $e) {
+            return $this->errorResponse($e);
+        }
+    }
+    // delete Pet
+
     // get Pet
     public function getPets()
     {
@@ -211,6 +288,7 @@ class ApiController extends Controller
             ])
                 ->select('pet_id', 'animal_id', 'breed_id', 'pet_name', 'pet_age', 'pet_gender', 'pet_image')
                 ->where('added_user_id', $user->id)
+                ->where('pet_status', 1)
                 ->get();
 
             if ($pets->isEmpty()) {
@@ -230,7 +308,7 @@ class ApiController extends Controller
         try {
             DB::beginTransaction();
             $user = Auth::user();
-
+            $petId = $request->input('pet_id');
             $validatedData = $request->validate([
                 'animal_id' => 'required',
                 'breed_id' => 'required',
@@ -248,35 +326,79 @@ class ApiController extends Controller
                 'pet_dob' => 'nullable',
             ]);
 
-            if ($request->hasFile('pet_image')) {
-                $image = $request->file('pet_image');
-                // Store the image in the 'animal_images' folder and get the file path
-                $imagePath = $image->store('pet_images', 'public'); // stored in 'storage/app/public/animal_images'
-                $imageFullPath = 'storage/' . $imagePath;
-            } else {
-                $imageFullPath = NULL;
+            if ($petId != null) {
+
+                $pet = Pet::where('pet_id', $petId)->first();
+
+                if ($request->hasFile('pet_image')) {
+                    // Get the path of the image from the animal record
+                    $imagePath = public_path($pet->pet_image); // Get the full image path
+
+                    // Delete the image file if it exists
+                    if (file_exists($imagePath)) {
+                        unlink($imagePath); // Delete the image from the file system
+                    }
+
+                    $image = $request->file('pet_image');
+                    // Store the image in the 'animal_images' folder and get the file path
+                    $imagePath = $image->store('pet_images', 'public'); // stored in 'storage/app/public/animal_images'
+                    $imageFullPath = 'storage/' . $imagePath;
+                    $pet->pet_image = $imageFullPath;
+                }
+
+                $pet->animal_id = $validatedData['animal_id'];
+                $pet->breed_id = $validatedData['breed_id'];
+                $pet->pet_name = $validatedData['pet_name'];
+                $pet->pet_age = $validatedData['pet_age'];
+                $pet->pet_gender = $validatedData['pet_gender'];
+                $pet->pet_height = $validatedData['pet_height'];
+                $pet->pet_weight = $validatedData['pet_weight'];
+                $pet->pet_variation = $validatedData['pet_variation'];
+                $pet->pet_apearance_desc = $validatedData['pet_apearance_desc'];
+                $pet->pet_nature_desc = $validatedData['pet_nature_desc'];
+                $pet->check_dob = $validatedData['check_dob'];
+                $pet->check_feed = $validatedData['check_feed'];
+                $pet->pet_dob = $validatedData['pet_dob'];
+
+                $pet->save();
+
+                DB::commit();
+                return response()->json(['success' => true, 'message' => 'Pet updated successfully', 'data' => $pet], 200);
+
+            }else{
+                if ($request->hasFile('pet_image')) {
+                    $image = $request->file('pet_image');
+                    // Store the image in the 'animal_images' folder and get the file path
+                    $imagePath = $image->store('pet_images', 'public'); // stored in 'storage/app/public/animal_images'
+                    $imageFullPath = 'storage/' . $imagePath;
+                } else {
+                    $imageFullPath = NULL;
+                }
+    
+                $pet = Pet::create([
+                    'added_user_id' => $user->id,
+                    'animal_id' => $validatedData['animal_id'],
+                    'breed_id' => $validatedData['breed_id'],
+                    'pet_name' => $validatedData['pet_name'],
+                    'pet_age' => $validatedData['pet_age'],
+                    'pet_gender' => $validatedData['pet_gender'],
+                    'pet_height' => $validatedData['pet_height'],
+                    'pet_weight' => $validatedData['pet_weight'],
+                    'pet_variation' => $validatedData['pet_variation'],
+                    'pet_apearance_desc' => $validatedData['pet_apearance_desc'],
+                    'pet_nature_desc' => $validatedData['pet_nature_desc'],
+                    'pet_image' => $imageFullPath,
+                    'check_dob' => $validatedData['check_dob'],
+                    'check_feed' => $validatedData['check_feed'],
+                    'pet_dob' => $validatedData['pet_dob'],
+                ]);
+
+                DB::commit();
+                return response()->json(['success' => true, 'message' => 'Pet added successfully', 'data' => $pet], 200);
+    
             }
 
-            $pet = Pet::create([
-                'added_user_id' => $user->id,
-                'animal_id' => $validatedData['animal_id'],
-                'breed_id' => $validatedData['breed_id'],
-                'pet_name' => $validatedData['pet_name'],
-                'pet_age' => $validatedData['pet_age'],
-                'pet_gender' => $validatedData['pet_gender'],
-                'pet_height' => $validatedData['pet_height'],
-                'pet_weight' => $validatedData['pet_weight'],
-                'pet_variation' => $validatedData['pet_variation'],
-                'pet_apearance_desc' => $validatedData['pet_apearance_desc'],
-                'pet_nature_desc' => $validatedData['pet_nature_desc'],
-                'pet_image' => $imageFullPath,
-                'check_dob' => $validatedData['check_dob'],
-                'check_feed' => $validatedData['check_feed'],
-                'pet_dob' => $validatedData['pet_dob'],
-            ]);
-
-            DB::commit();
-            return response()->json(['success' => true, 'message' => 'Pet added successfully', 'data' => $pet], 200);
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e);

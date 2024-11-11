@@ -29,6 +29,7 @@ class Pet extends Model
         'check_dob',
         'check_feed',
         'pet_dob',
+        'pet_status',
     ];
 
     public $timestamps = true;
