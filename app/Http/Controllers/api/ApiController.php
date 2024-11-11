@@ -8,6 +8,7 @@ use App\Models\AnimalBreed;
 use App\Models\Feeds;
 use App\Models\Pet;
 use App\Models\PetImages;
+use App\Models\Reminders;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -30,6 +31,81 @@ class ApiController extends Controller
         ], $code);
     }
     // user Defined
+
+    // delete reminder
+    public function deleteReminder(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $validatedData = $request->validate([
+                'reminder_id' => 'required',
+            ]);
+
+            $reminder = Reminders::where('reminder_id', $validatedData['reminder_id'])->where('added_user_id', $user->id)->first();
+            $reminder->delete();
+
+            return response()->json(['success' => true, 'message' => 'Reminder deleted'], 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e);
+        }
+    }
+    // delete reminder
+
+    // get reminder
+    public function getReminder()
+    {
+        $user = Auth::user();
+        $reminder = Reminders::where('added_user_id', $user->id)->get();
+        if ($reminder->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No feed found', 'data' => []]);
+        }
+        return response()->json(['success' => true, 'data' => $reminder], 200);
+    }
+    // get reminder
+
+    // add reminder
+    public function addReminder(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $user = Auth::user();
+            $reminderId = $request->input('reminder_id');
+
+            // Validate request data
+            $validatedData = $request->validate([
+                'reminder_title' => 'required',
+                'reminder_date' => 'required',
+                'reminder_time' => 'required',
+            ]);
+
+            // Convert date to YYYY-MM-DD and time to 24-hour format
+            $formattedDate = \DateTime::createFromFormat('d/m/Y', $validatedData['reminder_date'])->format('Y-m-d');
+            $formattedTime = \DateTime::createFromFormat('h:i A', $validatedData['reminder_time'])->format('H:i:s');
+
+            if ($reminderId != null) {
+                $reminder = Reminders::where('reminder_id', $reminderId)->first();
+                $reminder->reminder_title = $validatedData['reminder_title'];
+                $reminder->reminder_date = $formattedDate;
+                $reminder->reminder_time = $formattedTime;
+                $reminder->save();
+                DB::commit();
+                return response()->json(['success' => true, 'message' => 'Reminder updated successfully'], 200);
+            } else {
+                $reminder = Reminders::create([
+                    'added_user_id' => $user->id,
+                    'reminder_title' => $validatedData['reminder_title'],
+                    'reminder_date' => $formattedDate,
+                    'reminder_time' => $formattedTime,
+                ]);
+                DB::commit();
+                return response()->json(['success' => true, 'message' => 'Reminder added successfully'], 200);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse($e);
+        }
+    }
+    // add reminder
 
     // update user details
     public function updateUserDetails(Request $request)
@@ -204,16 +280,16 @@ class ApiController extends Controller
             $imagePaths = [];
 
             foreach ($images as $image) {
-            // Store each image and get the path
-            $imagePath = $image->store('pet_images', 'public'); // stored in 'storage/app/public/animal_images'
-            $imageFullPath = 'storage/' . $imagePath;
+                // Store each image and get the path
+                $imagePath = $image->store('pet_images', 'public'); // stored in 'storage/app/public/animal_images'
+                $imageFullPath = 'storage/' . $imagePath;
 
-            // Optionally save image paths to a database table
-            PetImages::create([
-                'added_user_id' => $user->id,
-                'pet_id' => $petId,
-                'pet_image' => $imageFullPath,
-            ]);
+                // Optionally save image paths to a database table
+                PetImages::create([
+                    'added_user_id' => $user->id,
+                    'pet_id' => $petId,
+                    'pet_image' => $imageFullPath,
+                ]);
             }
             DB::commit();
             return response()->json([
@@ -268,7 +344,6 @@ class ApiController extends Controller
             $pet->save();
 
             return response()->json(['success' => true, 'message' => 'Pet delted'], 200);
-            
         } catch (\Exception $e) {
             return $this->errorResponse($e);
         }
@@ -364,8 +439,7 @@ class ApiController extends Controller
 
                 DB::commit();
                 return response()->json(['success' => true, 'message' => 'Pet updated successfully', 'data' => $pet], 200);
-
-            }else{
+            } else {
                 if ($request->hasFile('pet_image')) {
                     $image = $request->file('pet_image');
                     // Store the image in the 'animal_images' folder and get the file path
@@ -374,7 +448,7 @@ class ApiController extends Controller
                 } else {
                     $imageFullPath = NULL;
                 }
-    
+
                 $pet = Pet::create([
                     'added_user_id' => $user->id,
                     'animal_id' => $validatedData['animal_id'],
@@ -395,10 +469,7 @@ class ApiController extends Controller
 
                 DB::commit();
                 return response()->json(['success' => true, 'message' => 'Pet added successfully', 'data' => $pet], 200);
-    
             }
-
-            
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse($e);

@@ -11,6 +11,10 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
+    Route::post('/addReminder', [ApiController::class, 'addReminder']);
+    Route::get('/getReminder', [ApiController::class, 'getReminder']);
+    Route::post('/deleteReminder', [ApiController::class, 'deleteReminder']);
+
     Route::post('/addFeed', [ApiController::class, 'addFeed']);
     Route::get('/getFeed', [ApiController::class, 'getFeed']);
     Route::post('/deleteFeed', [ApiController::class, 'deleteFeed']);
