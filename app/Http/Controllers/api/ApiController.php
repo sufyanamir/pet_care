@@ -55,11 +55,20 @@ class ApiController extends Controller
     public function getReminder()
     {
         $user = Auth::user();
-        $reminder = Reminders::where('added_user_id', $user->id)->get();
-        if ($reminder->isEmpty()) {
-            return response()->json(['success' => false, 'message' => 'No feed found', 'data' => []]);
+        $reminders = Reminders::where('added_user_id', $user->id)->get();
+
+        if ($reminders->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No reminders found', 'data' => []]);
         }
-        return response()->json(['success' => true, 'data' => $reminder], 200);
+
+        // Format each reminder's date and time
+        $formattedReminders = $reminders->map(function ($reminder) {
+            $reminder->reminder_date = \DateTime::createFromFormat('Y-m-d', $reminder->reminder_date)->format('d/m/Y');
+            $reminder->reminder_time = \DateTime::createFromFormat('H:i:s', $reminder->reminder_time)->format('h:i A');
+            return $reminder;
+        });
+
+        return response()->json(['success' => true, 'data' => $formattedReminders], 200);
     }
     // get reminder
 
