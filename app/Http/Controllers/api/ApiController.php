@@ -76,6 +76,7 @@ class ApiController extends Controller
                 'reminder_title' => 'required',
                 'reminder_date' => 'required',
                 'reminder_time' => 'required',
+                'reminder_icon' => 'icon',
             ]);
 
             // Convert date to YYYY-MM-DD and time to 24-hour format
@@ -87,6 +88,7 @@ class ApiController extends Controller
                 $reminder->reminder_title = $validatedData['reminder_title'];
                 $reminder->reminder_date = $formattedDate;
                 $reminder->reminder_time = $formattedTime;
+                $reminder->reminder_icon = $validatedData['reminder_icon'];
                 $reminder->save();
                 DB::commit();
                 return response()->json(['success' => true, 'message' => 'Reminder updated successfully'], 200);
@@ -96,6 +98,7 @@ class ApiController extends Controller
                     'reminder_title' => $validatedData['reminder_title'],
                     'reminder_date' => $formattedDate,
                     'reminder_time' => $formattedTime,
+                    'reminder_icon' => $validatedData['reminder_icon'],
                 ]);
                 DB::commit();
                 return response()->json(['success' => true, 'message' => 'Reminder added successfully'], 200);

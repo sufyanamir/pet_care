@@ -18,6 +18,7 @@ class Reminders extends Model
         'reminder_title',
         'reminder_date',
         'reminder_time',
+        'reminder_icon',
     ];
 
     public $timestamps = true;
