@@ -76,7 +76,7 @@ class ApiController extends Controller
                 'reminder_title' => 'required',
                 'reminder_date' => 'required',
                 'reminder_time' => 'required',
-                'reminder_icon' => 'icon',
+                'reminder_icon' => 'nullable',
             ]);
 
             // Convert date to YYYY-MM-DD and time to 24-hour format
