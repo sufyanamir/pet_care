@@ -172,24 +172,27 @@ class ApiController extends Controller
     public function likeFeed(Request $request)
     {
         try {
-
             $validatedData = $request->validate([
-                'feed_id' => 'required',
-                'key' => 'required',
+                'feed_id' => 'required|exists:feeds,feed_id',
+                'key' => 'required|in:like,disLike',
             ]);
 
             $feed = Feeds::where('feed_id', $validatedData['feed_id'])->first();
 
-            if ($validatedData['key'] == 'like') {
-                $feed->feed_likes += 1;
+            if ($feed) {
+                if ($validatedData['key'] === 'like') {
+                    $feed->feed_likes += 1;
+                    $message = 'Post Liked';
+                } elseif ($validatedData['key'] === 'disLike') {
+                    $feed->feed_likes = max(0, $feed->feed_likes - 1);
+                    $message = 'Post Disliked';
+                }
+
                 $feed->save();
 
-                return response()->json(['success' => true, 'message' => 'Post Liked'], 200);
-            } elseif ($validatedData['key'] == 'disLike') {
-                $feed->feed_likes -= 1;
-                $feed->save();
-
-                return response()->json(['success' => true, 'message' => 'Post Disliked'], 200);
+                return response()->json(['success' => true, 'message' => $message, 'likes' => $feed->feed_likes], 200);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Feed not found'], 404);
             }
         } catch (\Exception $e) {
             return $this->errorResponse($e);
@@ -288,7 +291,7 @@ class ApiController extends Controller
 
             $petId = $validatedData['pet_id'];
             $images = $request->file('pet_image');  // Get the array of images
-
+            $pet = Pet::where('pet_id', $validatedData['pet_id'])->first();
             $imagePaths = [];
 
             foreach ($images as $image) {
@@ -302,6 +305,13 @@ class ApiController extends Controller
                     'pet_id' => $petId,
                     'pet_image' => $imageFullPath,
                 ]);
+                if ($pet->check_feed == 1) {
+                    Feeds::create([
+                        'added_user_id' => $user->id,
+                        'pet_id' => $petId,
+                        'feed_post' => $imageFullPath,
+                    ]);
+                }
             }
             DB::commit();
             return response()->json([
@@ -373,7 +383,6 @@ class ApiController extends Controller
                 'animal:animal_id,animal_name',
                 'breed:breed_id,breed_name'
             ])
-                ->select('pet_id', 'animal_id', 'breed_id', 'pet_name', 'pet_age', 'pet_gender', 'pet_image')
                 ->where('added_user_id', $user->id)
                 ->where('pet_status', 1)
                 ->get();
@@ -433,6 +442,16 @@ class ApiController extends Controller
                     $pet->pet_image = $imageFullPath;
                 }
 
+                // if ($validatedData['check_feed'] == 1) {
+                //     if ($imageFullPath != NULL) {
+                //         Feeds::create([
+                //             'added_user_id' => $user->id,
+                //             'pet_id' => $pet->pet_id,
+                //             'feed_post' => $imageFullPath
+                //         ]);
+                //     }
+                // }
+
                 $pet->animal_id = $validatedData['animal_id'];
                 $pet->breed_id = $validatedData['breed_id'];
                 $pet->pet_name = $validatedData['pet_name'];
@@ -478,6 +497,16 @@ class ApiController extends Controller
                     'check_feed' => $validatedData['check_feed'],
                     'pet_dob' => $validatedData['pet_dob'],
                 ]);
+
+                if ($validatedData['check_feed'] == 1) {
+                    if ($imageFullPath != NULL) {
+                        Feeds::create([
+                            'added_user_id' => $user->id,
+                            'pet_id' => $pet->pet_id,
+                            'feed_post' => $imageFullPath
+                        ]);
+                    }
+                }
 
                 DB::commit();
                 return response()->json(['success' => true, 'message' => 'Pet added successfully', 'data' => $pet], 200);
