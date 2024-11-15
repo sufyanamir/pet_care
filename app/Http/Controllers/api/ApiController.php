@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -283,29 +284,36 @@ class ApiController extends Controller
             DB::beginTransaction();
             $user = Auth::user();
 
-            // Validate that 'pet_id' is required and 'pet_image' is an array of required images
             $validatedData = $request->validate([
-                'pet_id' => 'required',  // Assuming you have a pets table
-                'pet_image' => 'required',  // Multiple image validation
+                'pet_id' => 'required|exists:pets,pet_id',
+                'pet_image' => 'required|array',
+                'pet_image.*' => 'image|mimes:jpeg,png,jpg,gif',
             ]);
 
             $petId = $validatedData['pet_id'];
-            $images = $request->file('pet_image');  // Get the array of images
-            $pet = Pet::where('pet_id', $validatedData['pet_id'])->first();
-            $imagePaths = [];
+            $images = $request->file('pet_image');
+            $pet = Pet::find($petId);
+
+            if (!$images) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No images provided.'
+                ], 422);
+            }
+
+            $createFeed = $pet->check_feed == 1;
 
             foreach ($images as $image) {
-                // Store each image and get the path
-                $imagePath = $image->store('pet_images', 'public'); // stored in 'storage/app/public/animal_images'
-                $imageFullPath = 'storage/' . $imagePath;
+                $imagePath = $image->store('pet_images', 'public');
+                $imageFullPath = Storage::url($imagePath);
 
-                // Optionally save image paths to a database table
                 PetImages::create([
                     'added_user_id' => $user->id,
                     'pet_id' => $petId,
                     'pet_image' => $imageFullPath,
                 ]);
-                if ($pet->check_feed == 1) {
+
+                if ($createFeed) {
                     Feeds::create([
                         'added_user_id' => $user->id,
                         'pet_id' => $petId,
@@ -320,7 +328,10 @@ class ApiController extends Controller
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->errorResponse($e);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(), // For debugging; avoid exposing in production
+            ], 500);
         }
     }
     // add pet images
