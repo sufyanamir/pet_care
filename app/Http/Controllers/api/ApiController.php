@@ -33,6 +33,38 @@ class ApiController extends Controller
     }
     // user Defined
 
+    // upcoming reminders
+    public function upcomingReminders()
+    {
+        $reminders = Reminders::where('reminder_date', '>=', now()) // Only include future reminders
+            ->orderBy('reminder_date', 'asc')    // Sort by closest reminder date
+            ->limit(2)                           // Limit to 2 reminders
+            ->get();
+
+        return response()->json(['success' => true, 'data' => $reminders]);
+    }
+
+    // upcoming reminders
+
+    // most liked feeds
+    public function mostLikedFeed()
+    {
+        $user = Auth::user();
+
+        // Get the maximum likes for the user's feeds
+        $maxLikes = Feeds::where('added_user_id', $user->id)->max('feed_likes');
+
+        // Get all feeds that have the maximum likes and limit the results to 6
+        $feed = Feeds::where('added_user_id', $user->id)
+            ->where('feed_likes', $maxLikes)
+            ->limit(2)
+            ->get();
+
+        return response()->json(['success' => true, 'data' => $feed]);
+    }
+
+    // most liked feeds
+
     // delete reminder
     public function deleteReminder(Request $request)
     {
@@ -254,19 +286,19 @@ class ApiController extends Controller
                 'post_desc' => 'nullable',
             ]);
 
-            if ($request->hasFile('feed_post')) {
-                $image = $request->file('feed_post');
-                // Store the image in the 'animal_images' folder and get the file path
-                $imagePath = $image->store('feed_posts', 'public'); // stored in 'storage/app/public/animal_images'
-                $imageFullPath = 'storage/' . $imagePath;
-            } else {
-                $imageFullPath = NULL;
-            }
+            // if ($request->hasFile('feed_post')) {
+            //     $image = $request->file('feed_post');
+            //     // Store the image in the 'animal_images' folder and get the file path
+            //     $imagePath = $image->store('feed_posts', 'public'); // stored in 'storage/app/public/animal_images'
+            //     $imageFullPath = 'storage/' . $imagePath;
+            // } else {
+            //     $imageFullPath = NULL;
+            // }
 
             $feed = Feeds::create([
                 'added_user_id' => $user->id,
                 'pet_id' => $validatedData['pet_id'],
-                'feed_post' => $imageFullPath,
+                'feed_post' => $validatedData['feed_post'],
                 'post_desc' => $validatedData['post_desc'],
             ]);
 
@@ -554,6 +586,22 @@ class ApiController extends Controller
         return response()->json(['success' => true, 'data' => $animals], 200);
     }
     // get Animals
+
+    // logout
+    public function logout(Request $request)
+    {
+        try {
+            $user = Auth::user();
+
+            // Revoke the user's token(s)
+            $user->tokens()->delete();
+
+            return response()->json(['success' => true, 'message' => 'Logged out successfully'], 200);
+        } catch (\Exception $e) {
+            return response(['success' => false, 'message' => $e->getMessage()], 400);
+        }
+    }
+    // logout
 
     // Login
     public function login(Request $request)

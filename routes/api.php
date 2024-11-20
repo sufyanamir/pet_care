@@ -33,6 +33,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/getUserDetails', [ApiController::class, 'getUserDetails']);
     Route::post('/updateUserDetails', [ApiController::class, 'updateUserDetails']);
 
+    Route::get('/mostLikedFeed', [ApiController::class, 'mostLikedFeed']);
+    Route::get('/upcomingReminders', [ApiController::class, 'upcomingReminders']);
+
+    Route::match(['post', 'get'], '/logout', [ApiController::class, 'logout']);
+
 });
 
 Route::post('/login', [ApiController::class, 'login']);
