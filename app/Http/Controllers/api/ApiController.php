@@ -10,6 +10,7 @@ use App\Models\Pet;
 use App\Models\PetImages;
 use App\Models\Reminders;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -37,12 +38,18 @@ class ApiController extends Controller
     public function upcomingReminders()
     {
         $reminders = Reminders::where('reminder_date', '>=', now()) // Only include future reminders
-            ->orderBy('reminder_date', 'asc')    // Sort by closest reminder date
-            ->limit(2)                           // Limit to 2 reminders
-            ->get();
+            ->orderBy('reminder_date', 'asc')                      // Sort by closest reminder date
+            ->limit(2)                                             // Limit to 2 reminders
+            ->get()
+            ->map(function ($reminder) {
+                // Format reminder_time to include AM/PM
+                $reminder->reminder_time = Carbon::parse($reminder->reminder_time)->format('h:i A');
+                return $reminder;
+            });
 
         return response()->json(['success' => true, 'data' => $reminders]);
     }
+
 
     // upcoming reminders
 
