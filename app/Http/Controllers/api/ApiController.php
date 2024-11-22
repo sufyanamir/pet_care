@@ -36,19 +36,28 @@ class ApiController extends Controller
 
     // upcoming reminders
     public function upcomingReminders()
-    {
-        $reminders = Reminders::where('reminder_date', '>=', now()) // Only include future reminders
-            ->orderBy('reminder_date', 'asc')                      // Sort by closest reminder date
-            ->limit(2)                                             // Limit to 2 reminders
-            ->get()
-            ->map(function ($reminder) {
-                // Format reminder_time to include AM/PM
-                $reminder->reminder_time = Carbon::parse($reminder->reminder_time)->format('h:i A');
-                return $reminder;
-            });
+{
+    $now = now(); // Current date and time
 
-        return response()->json(['success' => true, 'data' => $reminders]);
-    }
+    $reminders = Reminders::where(function ($query) use ($now) {
+            $query->where('reminder_date', '>', $now->toDateString()) // Future dates
+                  ->orWhere(function ($subQuery) use ($now) {
+                      $subQuery->where('reminder_date', '=', $now->toDateString()) // Today's reminders
+                               ->where('reminder_time', '>=', $now->toTimeString()); // Future times
+                  });
+        })
+        ->orderBy('reminder_date', 'asc') // Sort by date
+        ->orderBy('reminder_time', 'asc') // Then by time
+        ->limit(2)                         // Limit to 2 reminders
+        ->get()
+        ->map(function ($reminder) {
+            // Format reminder_time to 12-hour with AM/PM
+            $reminder->reminder_time = Carbon::createFromFormat('H:i:s', $reminder->reminder_time)->format('h:i A');
+            return $reminder;
+        });
+
+    return response()->json(['success' => true, 'data' => $reminders]);
+}
 
 
     // upcoming reminders
