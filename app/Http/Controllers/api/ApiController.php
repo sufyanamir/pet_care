@@ -475,7 +475,7 @@ class ApiController extends Controller
                 'pet_variation' => 'required',
                 'pet_apearance_desc' => 'nullable',
                 'pet_nature_desc' => 'nullable',
-                'pet_image' => 'required',
+                'pet_image' => 'nullable',
                 'check_dob' => 'nullable',
                 'check_feed' => 'nullable',
                 'pet_dob' => 'nullable',

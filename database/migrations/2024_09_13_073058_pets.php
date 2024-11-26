@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('pet_variation');
             $table->text('pet_apearance_desc')->nullable();
             $table->text('pet_nature_desc')->nullable();
-            $table->text('pet_image');
+            $table->text('pet_image')->nullable;
             $table->string('check_dob')->nullable()->default('0');
             $table->string('check_feed')->nullable()->default('0');
             $table->timestamp('pet_dob')->nullable();
