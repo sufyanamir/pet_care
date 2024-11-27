@@ -24,7 +24,7 @@
             <tbody id="universalTableBody" class=" text-sm">
                 @foreach($breeds as $breed)
                 <tr>
-                    <td>{{$breed->animal->animal_name}}</td>
+                <td>{{$breed->animal->animal_name ?? 'animal name'}}</td>
                     <td><img src="{{asset($breed->breed_image)}}" class=" w-12" alt="Image"></td>
                     <td>{{$breed->breed_name}}</td>
                     <td>
