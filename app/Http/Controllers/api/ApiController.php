@@ -68,12 +68,12 @@ class ApiController extends Controller
         $user = Auth::user();
 
         // Get the maximum likes for the user's feeds
-        $maxLikes = Feeds::where('added_user_id', $user->id)->max('feed_likes');
+        // $maxLikes = Feeds::where('added_user_id', $user->id)->max('feed_likes');
 
         // Get all feeds that have the maximum likes and limit the results to 6
         $feed = Feeds::where('added_user_id', $user->id)
-            ->where('feed_likes', $maxLikes)
-            ->limit(2)
+            ->limit(5)
+            ->orderBy('created_at', 'DESC')
             ->get();
 
         return response()->json(['success' => true, 'data' => $feed]);
