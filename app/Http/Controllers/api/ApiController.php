@@ -302,19 +302,19 @@ class ApiController extends Controller
                 'post_desc' => 'nullable',
             ]);
 
-            // if ($request->hasFile('feed_post')) {
-            //     $image = $request->file('feed_post');
-            //     // Store the image in the 'animal_images' folder and get the file path
-            //     $imagePath = $image->store('feed_posts', 'public'); // stored in 'storage/app/public/animal_images'
-            //     $imageFullPath = 'storage/' . $imagePath;
-            // } else {
-            //     $imageFullPath = NULL;
-            // }
+            if ($request->hasFile('feed_post')) {
+                $image = $request->file('feed_post');
+                // Store the image in the 'animal_images' folder and get the file path
+                $imagePath = $image->store('feed_posts', 'public'); // stored in 'storage/app/public/animal_images'
+                $imageFullPath = 'storage/' . $imagePath;
+            } else {
+                $imageFullPath = NULL;
+            }
 
             $feed = Feeds::create([
                 'added_user_id' => $user->id,
                 'pet_id' => $validatedData['pet_id'],
-                'feed_post' => $validatedData['feed_post'],
+                'feed_post' => $imageFullPath,
                 'post_desc' => $validatedData['post_desc'],
             ]);
 
@@ -562,7 +562,8 @@ class ApiController extends Controller
                         Feeds::create([
                             'added_user_id' => $user->id,
                             'pet_id' => $pet->pet_id,
-                            'feed_post' => $imageFullPath
+                            'feed_post' => $imageFullPath,
+                            'post_desc' => $validatedData['pet_apearance_desc'],
                         ]);
                     }
                 }
